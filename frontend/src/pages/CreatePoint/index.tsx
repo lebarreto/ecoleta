@@ -4,6 +4,7 @@ import { FiArrowLeft, FiCheckCircle } from 'react-icons/fi';
 import { Map, TileLayer, Marker } from 'react-leaflet';
 import axios from 'axios';
 import { LeafletMouseEvent } from 'leaflet';
+import * as Yup from 'yup';
 
 import './styles.css';
 import logo from '../../assets/logo.svg';
@@ -23,6 +24,25 @@ interface IbgeUF {
 interface IbgeCity {
   nome: string;
 }
+
+const schema = Yup.object().shape({
+  name: Yup.string().required('O nome do estabelecimento é obrigatório.'),
+  email: Yup.string()
+    .email('Insira um e-mail válido.')
+    .required('O e-mail é obrigatório.'),
+  whatsapp: Yup.string().required(
+    'O whatsapp do estabelecimento é obrigatório.',
+  ),
+  latitude: Yup.number().required(
+    'A latitude do estabelecimento é obrigatória.',
+  ),
+  longitude: Yup.number().required(
+    'A longitude do estabelecimento é obrigatória.',
+  ),
+  city: Yup.string().required('A cidade é obrigatória.'),
+  uf: Yup.string().min(2).max(2).required('O estado é obrigatório.'),
+  image: Yup.string().required('A imagem do estabelecimento é obrigatória.'),
+});
 
 const CreatePoint: React.FC = () => {
   const history = useHistory();
@@ -120,6 +140,29 @@ const CreatePoint: React.FC = () => {
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
 
+    const { name, email, whatsapp } = formData;
+    const uf = selectedUF;
+    const city = selectedCity;
+    const [latitude, longitude] = position;
+    const items = selectedItems;
+
+    const data = new FormData();
+
+    data.append('name', name);
+    data.append('email', email);
+    data.append('whatsapp', whatsapp);
+    data.append('uf', uf);
+    data.append('city', city);
+    data.append('latitude', String(latitude));
+    data.append('longitude', String(longitude));
+    data.append('items', items.join(','));
+
+    if (selectedFile) {
+      data.append('image', selectedFile);
+    }
+
+    await api.post('points', data);
+
     setSubmitedVisible(true);
 
     window.scrollTo(0, 0);
@@ -127,31 +170,6 @@ const CreatePoint: React.FC = () => {
     setTimeout(() => {
       history.push('/');
     }, 2000);
-
-    // const { name, email, whatsapp } = formData;
-    // const uf = selectedUF;
-    // const city = selectedCity;
-    // const [latitude, longitude] = position;
-    // const items = selectedItems;
-
-    // const data = new FormData();
-
-    // data.append('name', name);
-    // data.append('email', email);
-    // data.append('whatsapp', whatsapp);
-    // data.append('uf', uf);
-    // data.append('city', city);
-    // data.append('latitude', String(latitude));
-    // data.append('longitude', String(longitude));
-    // data.append('items', items.join(','));
-
-    // if (selectedFile) {
-    //   data.append('image', selectedFile);
-    // }
-
-    // await api.post('points', data);
-
-    // alert('Ponto de coleta criado!');
   }
 
   return (
