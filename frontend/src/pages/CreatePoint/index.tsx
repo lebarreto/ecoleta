@@ -1,6 +1,6 @@
 import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import { FiArrowLeft } from 'react-icons/fi';
+import { FiArrowLeft, FiCheckCircle } from 'react-icons/fi';
 import { Map, TileLayer, Marker } from 'react-leaflet';
 import axios from 'axios';
 import { LeafletMouseEvent } from 'leaflet';
@@ -8,6 +8,7 @@ import { LeafletMouseEvent } from 'leaflet';
 import './styles.css';
 import logo from '../../assets/logo.svg';
 import api from '../../services/api';
+import Dropzone from '../../components/Dropzone';
 
 interface Item {
   id: number;
@@ -39,6 +40,9 @@ const CreatePoint: React.FC = () => {
   const [selectedUF, setSelectedUF] = useState('0');
   const [selectedCity, setSelectedCity] = useState('0');
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  const [selectedFile, setSelectedFile] = useState<File>();
+
+  const [submitedVisible, setSubmitedVisible] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -116,28 +120,38 @@ const CreatePoint: React.FC = () => {
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
 
-    const { name, email, whatsapp } = formData;
-    const uf = selectedUF;
-    const city = selectedCity;
-    const [latitude, longitude] = position;
-    const items = selectedItems;
+    setSubmitedVisible(true);
 
-    const data = {
-      name,
-      email,
-      whatsapp,
-      uf,
-      city,
-      latitude,
-      longitude,
-      items,
-    };
+    window.scrollTo(0, 0);
 
-    await api.post('points', data);
+    setTimeout(() => {
+      history.push('/');
+    }, 2000);
 
-    alert('Ponto de coleta criado!');
+    // const { name, email, whatsapp } = formData;
+    // const uf = selectedUF;
+    // const city = selectedCity;
+    // const [latitude, longitude] = position;
+    // const items = selectedItems;
 
-    history.push('/');
+    // const data = new FormData();
+
+    // data.append('name', name);
+    // data.append('email', email);
+    // data.append('whatsapp', whatsapp);
+    // data.append('uf', uf);
+    // data.append('city', city);
+    // data.append('latitude', String(latitude));
+    // data.append('longitude', String(longitude));
+    // data.append('items', items.join(','));
+
+    // if (selectedFile) {
+    //   data.append('image', selectedFile);
+    // }
+
+    // await api.post('points', data);
+
+    // alert('Ponto de coleta criado!');
   }
 
   return (
@@ -154,6 +168,8 @@ const CreatePoint: React.FC = () => {
         <h1>
           Cadastro do <br /> ponto de coleta
         </h1>
+
+        <Dropzone onFileUploaded={setSelectedFile} />
 
         <fieldset>
           <legend>
@@ -264,6 +280,14 @@ const CreatePoint: React.FC = () => {
 
         <button type="submit">Cadastrar ponto de coleta</button>
       </form>
+      {submitedVisible && (
+        <div className="submitted">
+          <p>
+            <FiCheckCircle />
+            Cadastro concluído!
+          </p>
+        </div>
+      )}
     </div>
   );
 };

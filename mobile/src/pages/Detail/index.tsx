@@ -31,6 +31,7 @@ interface Data {
     whatsapp: string;
     city: string;
     uf: string;
+    image_url: string;
   };
   items: {
     title: string;
@@ -77,7 +78,7 @@ const Detail: React.FC = () => {
 
         <PointImage
           source={{
-            uri: data.point.image,
+            uri: data.point.image_url,
           }}
         />
         <PointName>{data.point.name}</PointName>
